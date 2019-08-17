@@ -23,7 +23,7 @@ type WeatherInfo struct {
 	Temp     string
 	Humidity string
 	Weth     string
-	Units
+	Units    Units
 }
 
 //Units selects a unit
