@@ -23,7 +23,7 @@ type WeatherInfo struct {
 	Temp     string
 	Humidity string
 	Weth     string
-	Units    Units
+	//Units    Units
 }
 
 //Units selects a unit
@@ -89,7 +89,7 @@ func MakeQuery(weatherUrl string) (w *WeatherInfo) {
 
 	//parse json
 	w = new(WeatherInfo)
-	w.Tp, _ = js.Get("query").Get("results").Get("channel").Get("units").Get("temperature").String()
+	//w.Tp, _ = js.Get("query").Get("results").Get("channel").Get("units").Get("temperature").String()
 	w.Temp, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("temp").String()
 	w.Weth, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("text").String()
 	w.Humidity, _ = js.Get("query").Get("results").Get("channel").Get("atmosphere").Get("humidity").String()
