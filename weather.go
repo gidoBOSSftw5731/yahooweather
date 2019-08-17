@@ -1,4 +1,4 @@
-/* 
+/*
    Yahooweather is my first program in Go. It is still under development.
    Dependencies:
     github.com/bitly/go-simplejson
@@ -10,48 +10,64 @@
 package yahooweather
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+
 	"github.com/bitly/go-simplejson"
-	"io/ioutil"
-	"fmt"
 )
 
-//Even in struct, only words that start with upper-case letter can be used outside the package
+//WeatherInfo is returned with weather data
 type WeatherInfo struct {
-	Temp string
+	Temp     string
 	Humidity string
-	Weth string
+	Weth     string
 	Units
 }
 
+//Units selects a unit
 type Units struct {
 	Tp string
 }
 
+//Location specifies a location, you need EITHER a zipcode or a city/state
 type Location struct {
-	City string
-	State string
+	City    string
+	State   string
+	Zipcode string
 }
 
-func BuildLocation(city string, state string) (loc *Location){
-	return &Location {
+//BuildLocation builds a Location struct
+func BuildLocation(city, state, zipcode string) (loc *Location) {
+	return &Location{
 		city,
 		state,
+		zipcode,
 	}
 }
 
+//BuildUrl returns a parsed URL
 func BuildUrl(loc *Location) (urlParsed string) {
 	Url, _ := url.Parse("https://query.yahooapis.com/v1/public/yql")
 	parameters := url.Values{}
-	parameters.Add("q","select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + loc.City + ", " + loc.State + "\")")
-	parameters.Add("format","json")
+
+	if loc.Zipcode != "" {
+		parameters.Add("q", "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\""+loc.Zipcode+"\")")
+
+	} else {
+		parameters.Add("q", "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\""+loc.City+", "+loc.State+"\")")
+
+	}
+
+	parameters.Add("format", "json")
 	Url.RawQuery = parameters.Encode()
 	urlParsed = Url.String()
-	return 
+	return
 }
 
-func MakeQuery(weatherUrl string) (w *WeatherInfo){
+//MakeQuery queries the servers
+func MakeQuery(weatherUrl string) (w *WeatherInfo) {
 	resp, err := http.Get(weatherUrl)
 	if err != nil {
 		fmt.Println("Connected Error")
@@ -72,10 +88,10 @@ func MakeQuery(weatherUrl string) (w *WeatherInfo){
 	}
 
 	//parse json
-	w = new(WeatherInfo)	
+	w = new(WeatherInfo)
 	w.Tp, _ = js.Get("query").Get("results").Get("channel").Get("units").Get("temperature").String()
 	w.Temp, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("temp").String()
-	w.Weth,_ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("text").String()
-	w.Humidity,_ = js.Get("query").Get("results").Get("channel").Get("atmosphere").Get("humidity").String()
-	return 
+	w.Weth, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("text").String()
+	w.Humidity, _ = js.Get("query").Get("results").Get("channel").Get("atmosphere").Get("humidity").String()
+	return
 }
