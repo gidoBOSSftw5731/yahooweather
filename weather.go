@@ -49,15 +49,14 @@ func BuildLocation(city, state, zipcode string) (loc *Location) {
 
 //BuildUrl returns a parsed URL
 func BuildUrl(loc *Location) (urlParsed string) {
-	Url, _ := url.Parse("https://query.yahooapis.com/v1/public/yql")
+	Url, _ := url.Parse("https://weather-ydn-yql.media.yahoo.com/forecastrss")
 	parameters := url.Values{}
 
 	if loc.Zipcode != "" {
-		parameters.Add("q", "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\""+loc.Zipcode+"\")")
+		parameters.Add("location", loc.Zipcode)
 
 	} else {
-		parameters.Add("q", "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\""+loc.City+", "+loc.State+"\")")
-
+		parameters.Add("location", loc.City+", "+loc.State)
 	}
 
 	parameters.Add("format", "json")
