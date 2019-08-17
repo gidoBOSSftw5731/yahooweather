@@ -67,31 +67,32 @@ func BuildUrl(loc *Location) (urlParsed string) {
 }
 
 //MakeQuery queries the servers
-func MakeQuery(weatherUrl string) (w *WeatherInfo) {
+func MakeQuery(weatherUrl string) WeatherInfo {
+	var w WeatherInfo
+
 	resp, err := http.Get(weatherUrl)
 	if err != nil {
 		fmt.Println("Connected Error")
-		return nil
+		return w
 	}
 
 	defer resp.Body.Close()
 	body, er := ioutil.ReadAll(resp.Body)
 	if er != nil {
 		fmt.Println("Cannot Read Information")
-		return nil
+		return w
 	}
 
 	js, e := simplejson.NewJson(body)
 	if e != nil {
 		fmt.Println("Parsing Json Error")
-		return nil
+		return w
 	}
 
 	//parse json
-	w = new(WeatherInfo)
 	//w.Tp, _ = js.Get("query").Get("results").Get("channel").Get("units").Get("temperature").String()
 	w.Temp, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("temp").String()
 	w.Weth, _ = js.Get("query").Get("results").Get("channel").Get("item").Get("condition").Get("text").String()
 	w.Humidity, _ = js.Get("query").Get("results").Get("channel").Get("atmosphere").Get("humidity").String()
-	return
+	return w
 }
